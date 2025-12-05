@@ -18,7 +18,7 @@ export class ApiTesterComponent {
   headers = signal<KeyValue[]>([{ key: '', value: '', enabled: true }]);
   bodyType = signal<BodyType>('none');
   jsonBody = signal('{\n  \n}');
-  formData = signal<KeyValue[]>([{ key: '', value: '', enabled: true }]);
+  formData = signal<KeyValue[]>([{ key: '', value: '', enabled: true, type: 'text' }]);
 
   // Response data
   response = signal<ApiResponse | null>(null);
@@ -51,7 +51,7 @@ export class ApiTesterComponent {
   }
 
   addFormDataItem(): void {
-    this.formData.update(data => [...data, { key: '', value: '', enabled: true }]);
+    this.formData.update(data => [...data, { key: '', value: '', enabled: true, type: 'text' }]);
   }
 
   removeFormDataItem(index: number): void {
@@ -64,6 +64,35 @@ export class ApiTesterComponent {
       newData[index].enabled = !newData[index].enabled;
       return newData;
     });
+  }
+
+  toggleFormDataType(index: number): void {
+    this.formData.update(data => {
+      const newData = [...data];
+      const currentType = newData[index].type || 'text';
+      newData[index].type = currentType === 'text' ? 'file' : 'text';
+      // Clear value/file when switching types
+      if (newData[index].type === 'file') {
+        newData[index].value = '';
+        newData[index].file = undefined;
+      } else {
+        newData[index].file = undefined;
+      }
+      return newData;
+    });
+  }
+
+  onFileSelected(event: Event, index: number): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      const file = input.files[0];
+      this.formData.update(data => {
+        const newData = [...data];
+        newData[index].file = file;
+        newData[index].value = file.name; // Store filename for display
+        return newData;
+      });
+    }
   }
 
   sendRequest(): void {

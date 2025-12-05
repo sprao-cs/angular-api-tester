@@ -8,6 +8,8 @@ export interface KeyValue {
   key: string;
   value: string;
   enabled?: boolean;
+  type?: 'text' | 'file'; // Type of input for form-data
+  file?: File; // File object when type is 'file'
 }
 
 export interface ApiRequest {

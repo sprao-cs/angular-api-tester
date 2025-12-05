@@ -166,6 +166,13 @@
   align-items: center;
 }
 
+/* Form Data Row with File Support */
+.form-data-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
 .checkbox {
   width: 20px;
   height: 20px;
@@ -194,6 +201,79 @@
   outline: none;
   border-color: #667eea;
   background: rgba(255, 255, 255, 0.08);
+}
+
+/* Type Toggle Button for Form Data */
+.type-toggle-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  background: rgba(139, 92, 246, 0.1);
+  color: #8b5cf6;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.type-toggle-btn:hover {
+  background: rgba(139, 92, 246, 0.2);
+  border-color: rgba(139, 92, 246, 0.5);
+  transform: scale(1.05);
+}
+
+.type-toggle-btn svg {
+  display: block;
+}
+
+/* File Input Wrapper */
+.file-input-wrapper {
+  flex: 1;
+  position: relative;
+}
+
+.file-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.file-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-secondary);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.file-label:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(102, 126, 234, 0.5);
+  color: var(--text-primary);
+}
+
+.file-label svg {
+  flex-shrink: 0;
+}
+
+.file-label .filename {
+  color: #8b5cf6;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .add-button,

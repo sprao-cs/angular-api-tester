@@ -121,7 +121,13 @@ export class ApiService {
       request.formData
         .filter(item => item.enabled !== false && item.key)
         .forEach(item => {
-          formData.append(item.key, item.value);
+          if (item.type === 'file' && item.file) {
+            // Append file
+            formData.append(item.key, item.file, item.file.name);
+          } else if (item.type === 'text' || !item.type) {
+            // Append text value
+            formData.append(item.key, item.value);
+          }
         });
       return formData;
     }

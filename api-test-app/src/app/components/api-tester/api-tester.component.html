@@ -80,7 +80,7 @@
       <!-- Form Data Body -->
       <div *ngIf="bodyType() === 'form-data'" class="body-content">
         <div class="key-value-list">
-          <div *ngFor="let item of formData(); let i = index; trackBy: trackByIndex" class="key-value-item">
+          <div *ngFor="let item of formData(); let i = index; trackBy: trackByIndex" class="form-data-row">
             <input 
               type="checkbox" 
               [checked]="item.enabled !== false"
@@ -93,12 +93,53 @@
               placeholder="Key"
               class="key-input"
             />
+            
+            <!-- Type Toggle Button -->
+            <button 
+              (click)="toggleFormDataType(i)" 
+              class="type-toggle-btn"
+              [title]="(item.type || 'text') === 'text' ? 'Switch to File' : 'Switch to Text'"
+            >
+              <svg *ngIf="(item.type || 'text') === 'text'" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="12" y1="18" x2="12" y2="12"></line>
+                <line x1="9" y1="15" x2="15" y2="15"></line>
+              </svg>
+              <svg *ngIf="(item.type || 'text') === 'file'" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+              </svg>
+            </button>
+
+            <!-- Text Input -->
             <input 
+              *ngIf="(item.type || 'text') === 'text'"
               type="text" 
               [(ngModel)]="item.value" 
               placeholder="Value"
               class="value-input"
             />
+            
+            <!-- File Input -->
+            <div *ngIf="(item.type || 'text') === 'file'" class="file-input-wrapper">
+              <input 
+                type="file"
+                (change)="onFileSelected($event, i)"
+                class="file-input"
+                [id]="'file-' + i"
+              />
+              <label [for]="'file-' + i" class="file-label">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="17 8 12 3 7 8"></polyline>
+                  <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+                <span *ngIf="!item.value">Choose File</span>
+                <span *ngIf="item.value" class="filename">{{ item.value }}</span>
+              </label>
+            </div>
+
             <button (click)="removeFormDataItem(i)" class="remove-button">×</button>
           </div>
         </div>
