@@ -1,0 +1,208 @@
+<div class="api-tester-container">
+  <!-- Request Configuration Panel -->
+  <div class="request-panel">
+    <h2>API Request Configuration</h2>
+
+    <!-- URL and Method -->
+    <div class="url-section">
+      <select [(ngModel)]="method" class="method-select">
+        <option *ngFor="let m of httpMethods" [value]="m">{{ m }}</option>
+      </select>
+      <input 
+        type="text" 
+        [(ngModel)]="url" 
+        placeholder="Enter API URL (e.g., https://api.example.com/endpoint)"
+        class="url-input"
+      />
+      <button (click)="sendRequest()" [disabled]="isLoading()" class="send-button">
+        <span *ngIf="!isLoading()">Send</span>
+        <span *ngIf="isLoading()" class="loader"></span>
+      </button>
+    </div>
+
+    <!-- Headers Section -->
+    <div class="section">
+      <div class="section-header">
+        <h3>Headers</h3>
+        <button (click)="addHeader()" class="add-button">+ Add Header</button>
+      </div>
+      <div class="key-value-list">
+        <div *ngFor="let header of headers(); let i = index; trackBy: trackByIndex" class="key-value-item">
+          <input 
+            type="checkbox" 
+            [checked]="header.enabled !== false"
+            (change)="toggleHeader(i)"
+            class="checkbox"
+          />
+          <input 
+            type="text" 
+            [(ngModel)]="header.key" 
+            placeholder="Header name"
+            class="key-input"
+          />
+          <input 
+            type="text" 
+            [(ngModel)]="header.value" 
+            placeholder="Header value"
+            class="value-input"
+          />
+          <button (click)="removeHeader(i)" class="remove-button">×</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Body Type Selector -->
+    <div class="section">
+      <div class="section-header">
+        <h3>Request Body</h3>
+        <div class="body-type-selector">
+          <button 
+            *ngFor="let type of bodyTypes"
+            (click)="bodyType.set(type)"
+            [class.active]="bodyType() === type"
+            class="body-type-button"
+          >
+            {{ type === 'form-data' ? 'Form Data' : type.toUpperCase() }}
+          </button>
+        </div>
+      </div>
+
+      <!-- JSON Body -->
+      <div *ngIf="bodyType() === 'json'" class="body-content">
+        <textarea 
+          [(ngModel)]="jsonBody" 
+          placeholder='{\n  "key": "value"\n}'
+          class="json-editor"
+          rows="10"
+        ></textarea>
+      </div>
+
+      <!-- Form Data Body -->
+      <div *ngIf="bodyType() === 'form-data'" class="body-content">
+        <div class="key-value-list">
+          <div *ngFor="let item of formData(); let i = index; trackBy: trackByIndex" class="key-value-item">
+            <input 
+              type="checkbox" 
+              [checked]="item.enabled !== false"
+              (change)="toggleFormDataItem(i)"
+              class="checkbox"
+            />
+            <input 
+              type="text" 
+              [(ngModel)]="item.key" 
+              placeholder="Key"
+              class="key-input"
+            />
+            <input 
+              type="text" 
+              [(ngModel)]="item.value" 
+              placeholder="Value"
+              class="value-input"
+            />
+            <button (click)="removeFormDataItem(i)" class="remove-button">×</button>
+          </div>
+        </div>
+        <button (click)="addFormDataItem()" class="add-button">+ Add Form Data Field</button>
+      </div>
+
+      <!-- No Body -->
+      <div *ngIf="bodyType() === 'none'" class="body-content empty-state">
+        <p>No request body for this request</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Response Panel -->
+  <div class="response-panel">
+    <h2>Response</h2>
+
+    <div *ngIf="!response() && !isLoading()" class="empty-state">
+      <p>Configure your request and click "Send" to see the response here</p>
+    </div>
+
+    <div *ngIf="isLoading()" class="loading-state">
+      <div class="loading-spinner"></div>
+      <p>Sending request...</p>
+    </div>
+
+    <div *ngIf="response()" class="response-content">
+      <!-- Status and Timing -->
+      <div class="response-header">
+        <div class="status-badge" [ngClass]="getStatusClass(response()!.status)">
+          <span class="status-code">{{ response()!.status }}</span>
+          <span class="status-text">{{ response()!.statusText }}</span>
+        </div>
+        <div class="timing-badge">
+          <span>⏱️ {{ response()!.timing }}ms</span>
+        </div>
+      </div>
+
+      <!-- Error Alert -->
+      <div *ngIf="response()!.errorType !== 'NONE'" class="error-alert" [ngClass]="getErrorTypeClass(response()!.errorType)">
+        <h4>
+          <span *ngIf="response()!.errorType === 'CORS'">🚫 CORS Error Detected</span>
+          <span *ngIf="response()!.errorType === 'HTTP_4XX'">⚠️ Client Error</span>
+          <span *ngIf="response()!.errorType === 'HTTP_5XX'">❌ Server Error</span>
+          <span *ngIf="response()!.errorType === 'NETWORK'">🔌 Network Error</span>
+          <span *ngIf="response()!.errorType === 'TIMEOUT'">⏰ Timeout Error</span>
+        </h4>
+        <pre>{{ response()!.errorMessage }}</pre>
+      </div>
+
+      <!-- Response Headers -->
+      <div class="response-section">
+        <h3>Response Headers</h3>
+        <div class="headers-display">
+          <div *ngFor="let header of response()!.headers | keyvalue" class="header-row">
+            <span class="header-key">{{ header.key }}:</span>
+            <span class="header-value">{{ header.value }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Response Body -->
+      <div class="response-section">
+        <h3>Response Body</h3>
+        <pre class="response-body">{{ formatJson(response()!.body) }}</pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- History Sidebar -->
+  <div class="history-panel" [class.hidden]="!showHistory()">
+    <div class="history-header">
+      <h2>History</h2>
+      <button (click)="clearHistory()" *ngIf="history().length > 0" class="clear-button">Clear</button>
+    </div>
+
+    <div *ngIf="history().length === 0" class="empty-state">
+      <p>No history yet</p>
+    </div>
+
+    <div class="history-list">
+      <div 
+        *ngFor="let item of history(); trackBy: trackById" 
+        (click)="loadFromHistory(item)"
+        class="history-item"
+      >
+        <div class="history-item-method">{{ item.request.method }}</div>
+        <div class="history-item-url">{{ item.request.url }}</div>
+        <div class="history-item-status" [ngClass]="getStatusClass(item.response?.status || 0)">
+          {{ item.response?.status || '—' }}
+        </div>
+        <div class="history-item-time">{{ formatTimestamp(item.request.timestamp || 0) }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating History Toggle Button -->
+  <button (click)="toggleHistory()" class="history-toggle-btn" [title]="showHistory() ? 'Hide History' : 'Show History'">
+    <svg *ngIf="!showHistory()" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+    <svg *ngIf="showHistory()" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="15 18 9 12 15 6"></polyline>
+    </svg>
+    <span class="history-count" *ngIf="history().length > 0">{{ history().length }}</span>
+  </button>
+</div>
